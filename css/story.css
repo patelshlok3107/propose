@@ -456,6 +456,35 @@
   }
 }
 
+/* ── Story overlay additions ───────────────── */
+#story-overlay { z-index: 99999; }
+.story-now-playing { position: absolute; inset: 0; z-index: 12; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 10px; text-align: center; color: #fff; transition: opacity .8s ease, transform .8s ease; }
+.story-now-playing.hidden { opacity: 0; transform: translateY(-10px); pointer-events: none; }
+.story-now-playing strong { font: 600 clamp(2rem, 6vw, 4.8rem) / 1.05 var(--font-romantic); }
+.story-now-playing span { color: rgba(255,255,255,.58); font: .72rem / 1 var(--font-body); letter-spacing: .25em; text-transform: uppercase; }
+.story-now-playing .story-kicker { color: #d98d9b; }
+.story-video-container.active { z-index: 4; }
+.story-memory-container { z-index: 5; }
+.story-audio-error { position: absolute; z-index: 30; left: 50%; bottom: 7%; width: min(88vw, 520px); transform: translateX(-50%); color: #ffd9df; font: .82rem/1.5 var(--font-body); text-align: center; }
+.story-proposal { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; opacity: 0; pointer-events: none; overflow: hidden; background: #050304; transition: opacity 1s ease; }
+.story-proposal.active { opacity: 1; pointer-events: auto; }
+.story-proposal-photo, .story-proposal-shade { position: absolute; inset: -4%; }
+.story-proposal-photo { background-position: center; background-size: cover; filter: blur(2px) brightness(.45); transform: scale(1.06); animation: storyProposalZoom 16s ease-in-out infinite alternate; }
+.story-proposal-shade { background: radial-gradient(circle at center, rgba(15,4,8,.25), rgba(0,0,0,.9)); }
+.story-proposal-copy { position: relative; z-index: 1; width: min(88vw, 720px); color: #fff; text-align: center; }
+.story-proposal-copy p { margin: 1rem 0; color: rgba(255,255,255,.86); font: italic clamp(1rem, 2.4vw, 1.45rem)/1.4 var(--font-romantic); animation: storyProposalLine 1s both; }
+.story-proposal-copy h2 { margin: 2rem 0 2.2rem; color: #fff; font: 700 clamp(1.8rem, 5vw, 4rem)/1.1 var(--font-display); letter-spacing: .08em; text-shadow: 0 0 30px rgba(229,9,20,.28); }
+.story-proposal-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.story-proposal-buttons button { min-width: 150px; padding: 13px 20px; border: 1px solid rgba(255,255,255,.25); border-radius: 999px; background: rgba(255,255,255,.1); color: #fff; cursor: pointer; font: .76rem var(--font-body); letter-spacing: .08em; }
+.story-proposal-buttons button:hover { background: rgba(229,9,20,.55); }
+.story-celebration-copy strong { display: block; margin: 2rem 0; color: #fff; font: 600 clamp(1.5rem, 4vw, 3rem) var(--font-romantic); }
+@keyframes storyProposalZoom { from { transform: scale(1.06); } to { transform: scale(1.16); } }
+@keyframes storyProposalLine { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 767px) {
+  .story-proposal-copy h2 { letter-spacing: .04em; }
+  .story-proposal-buttons button { min-width: 140px; }
+}
+
 @media (orientation: landscape) and (max-width: 767px) {
   .story-memory-img {
     max-height: 40vh;

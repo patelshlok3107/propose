@@ -23,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   Story.init();
   Proposal.init();
 
+  // Bind after dashboard rendering so the existing Play control remains the entry point.
+  document.querySelector('.btn-play')?.addEventListener('click', () => Story.start());
+
   preloadImages();
   initScrollAnimations();
 });
