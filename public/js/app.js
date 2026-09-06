@@ -23,9 +23,31 @@ document.addEventListener('DOMContentLoaded', () => {
   Story.init();
   Proposal.init();
 
+  // Bind after dashboard rendering so the existing Play control remains the entry point.
+  document.querySelector('.btn-play')?.addEventListener('click', () => Story.start());
+
   preloadImages();
   initScrollAnimations();
+  initRomanticParticles();
 });
+
+function initRomanticParticles() {
+  const container = document.getElementById('romantic-particles');
+  if (!container || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const count = 7;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('span');
+    el.className = 'romantic-particle';
+    el.textContent = '❤';
+    el.style.left = (8 + Math.random() * 84) + '%';
+    el.style.bottom = (-10 - Math.random() * 20) + 'vh';
+    el.style.fontSize = (8 + Math.random() * 7) + 'px';
+    el.style.animationDuration = (22 + Math.random() * 18) + 's';
+    el.style.animationDelay = (Math.random() * 18) + 's';
+    el.style.opacity = (0.08 + Math.random() * 0.06).toFixed(2);
+    container.appendChild(el);
+  }
+}
 
 function preloadImages() {
   const imagesToPreload = [];

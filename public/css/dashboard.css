@@ -5,6 +5,30 @@
 body {
   background-color: #141414;
 }
+#romantic-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.romantic-particle {
+  position: absolute;
+  color: rgba(255, 107, 138, 0.14);
+  font-size: 10px;
+  animation: romanticFloat linear infinite;
+  user-select: none;
+  will-change: transform, opacity;
+}
+@keyframes romanticFloat {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.14; }
+  90% { opacity: 0.10; }
+  100% { transform: translateY(-10vh) translateX(18px) rotate(12deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .romantic-particle { display: none; }
+}
 
 #top-nav {
   position: fixed;
@@ -94,41 +118,43 @@ body {
 }
 
 /* ═══════════════════════════════════════════════
-   DASHBOARD HERO
+   DASHBOARD HERO — Netflix-style polished layout
+   Title sits cleanly BELOW navbar, left-aligned, never overlapping logo
    ═══════════════════════════════════════════════ */
 #hero-section {
   position: relative;
   width: 100%;
-  height: 85vh; /* Netflix style tall hero */
-  min-height: 600px;
-  max-height: 1000px;
+  height: 88vh;
+  min-height: 620px;
+  max-height: 860px;
   overflow: hidden;
+  display: block;
+  isolation: isolate;
 }
 
 .dashboard-hero-bg {
   position: absolute;
   top: 0;
   right: 0;
-  width: 75%;
+  width: 68%;
   height: 100%;
   background-size: cover;
-  background-position: right center;
+  background-position: right top;
+  background-repeat: no-repeat;
   z-index: 1;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
-  mask-image: linear-gradient(to right, transparent 0%, black 30%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 28%);
+  mask-image: linear-gradient(to right, transparent 0%, black 28%);
 }
 
 .dashboard-hero-gradient-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 2;
-  /* Deep cinematic fade into the background */
-  background: 
-    linear-gradient(to right, #141414 10%, rgba(20,20,20, 0.7) 45%, transparent 70%),
-    linear-gradient(to top, #141414 0%, rgba(20,20,20, 0) 35%);
+  background:
+    linear-gradient(to right, #141414 8%, rgba(20,20,20, 0.78) 38%, rgba(20,20,20, 0.32) 62%, transparent 78%),
+    linear-gradient(to top, #141414 0%, rgba(20,20,20, 0) 42%),
+    linear-gradient(to bottom, rgba(20,20,20, 0.55) 0%, transparent 22%);
+  pointer-events: none;
 }
 
 .dashboard-hero-content {
@@ -136,35 +162,45 @@ body {
   z-index: 3;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 140px 4% 10%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 640px) 1fr;
+  align-items: center;
+  gap: 40px;
+  padding: 88px 4% 64px; /* 68px navbar + 20px breathing */
   box-sizing: border-box;
 }
 
 .dashboard-hero-left {
-  max-width: 650px;
-  margin-bottom: 2rem;
+  max-width: 640px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding-top: 8px;
 }
 
 .dashboard-title {
   color: #fff;
   font-family: var(--font-display), "Helvetica Neue", sans-serif;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  line-height: 1.05;
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem);
+  line-height: 0.95;
   font-weight: 900;
-  letter-spacing: -1px;
+  letter-spacing: -1.2px;
   text-transform: uppercase;
-  margin-bottom: 1.2rem;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+  margin: 0;
+  padding: 0;
+  text-shadow: 2px 3px 12px rgba(0,0,0,0.85);
+  max-width: 100%;
 }
 
 .dashboard-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin: 2px 0 0;
 }
 
 .badge-icon {
@@ -179,25 +215,52 @@ body {
 .badge-text {
   color: #fff;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 .dashboard-tagline {
   color: #fff;
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
+  font-size: clamp(1rem, 2.2vw, 1.25rem);
+  margin: 0;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
   font-weight: 500;
 }
 
+.hero-original-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 0 0;
+}
+.hero-original-line {
+  font-size: 0.62rem;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.52);
+  font-weight: 600;
+}
+.hero-original-dot {
+  color: rgba(255,255,255,0.28);
+  font-size: 0.45rem;
+  line-height: 1;
+}
+.hero-genre-line {
+  font-size: 0.62rem;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.42);
+  font-weight: 400;
+}
+
 .dashboard-desc {
   color: #fff;
-  font-size: 1.15rem;
-  line-height: 1.4;
-  margin-bottom: 1.5rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.08rem);
+  line-height: 1.5;
+  margin: 0;
   text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-  max-width: 550px;
+  max-width: 560px;
 }
 
 .dashboard-buttons {
@@ -217,18 +280,25 @@ body {
   font-size: 1.1rem;
   cursor: pointer;
   border: none;
-  transition: transform 0.2s, opacity 0.2s;
+  transition: transform 0.24s cubic-bezier(0.16,1,0.3,1), box-shadow 0.24s ease, opacity 0.2s;
 }
 
 .dashboard-buttons button:hover {
-  opacity: 0.8;
+  opacity: 0.9;
   transform: scale(1.02);
 }
 
 .btn-play {
   background-color: #fff;
   color: #000;
+  box-shadow: 0 4px 16px rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.25);
 }
+.btn-play:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 28px rgba(255,255,255,0.16), 0 4px 16px rgba(229,9,20,0.10);
+  opacity: 1;
+}
+.btn-play:active { transform: scale(0.98); }
 
 .btn-list, .btn-icon {
   background-color: rgba(109, 109, 110, 0.7);
@@ -245,28 +315,36 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  align-items: flex-end;
   text-align: right;
-  margin-bottom: 0rem;
-  padding-bottom: 2rem;
+  align-self: end;
+  padding-bottom: 8px;
+  pointer-events: none;
 }
 
 .dashboard-author {
-  color: rgba(255,255,255,0.7);
-  font-size: 1rem;
-  line-height: 1.4;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+  color: rgba(255,255,255,0.72);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  text-shadow: 1px 2px 8px rgba(0,0,0,0.7);
   border-right: 3px solid #e50914;
-  padding-right: 15px;
+  padding-right: 14px;
+  background: rgba(20,20,20,0.38);
+  backdrop-filter: blur(6px);
+  border-radius: 0 4px 4px 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  max-width: 220px;
 }
 
 /* ═══════════════════════════════════════════════
-   MEDIA ROWS
+   MEDIA ROWS — starts balanced below hero
    ═══════════════════════════════════════════════ */
 #dashboard-content {
   padding: 0 0 4rem 0;
   position: relative;
   z-index: 5;
-  margin-top: -6rem; /* Pull up to overlap gradient */
+  margin-top: -32px;
 }
 
 .media-row {
@@ -319,7 +397,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.45s cubic-bezier(0.16,1,0.3,1), filter 0.3s ease;
 }
 
 .media-card-play-icon {
@@ -356,14 +434,74 @@ body {
 }
 
 .media-card:hover {
-  transform: scale(1.08); /* Netflix hover pop */
+  transform: scale(1.05);
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+.media-card:hover .media-card-img {
+  transform: scale(1.06);
+  filter: brightness(0.88);
+}
+.media-card::after {
+  content: "❤️";
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 0.82rem;
+  opacity: 0;
+  transform: translateY(4px) scale(0.85);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.7);
+  z-index: 2;
+}
+.media-card:hover::after {
+  opacity: 0.92;
+  transform: translateY(0) scale(1);
+}
+@media (hover: none) {
+  .media-card::after { display: none; }
+  .media-card:hover .media-card-img { transform: none; filter: none; }
 }
 
 .media-card:hover .media-card-overlay {
   transform: translateY(0);
   opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════
+   WHY I CHOOSE YOU — minimal romantic
+   ═══════════════════════════════════════════════ */
+#why-choose-section {
+  background: #0a0a0a;
+  padding: 56px 4% 64px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  text-align: center;
+}
+.why-choose-inner { max-width: 640px; margin: 0 auto; }
+.why-choose-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.8vw, 1.7rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
+  margin-bottom: 28px;
+}
+.why-choose-lines p {
+  font-family: var(--font-romantic);
+  font-size: clamp(1rem, 2.2vw, 1.18rem);
+  font-style: italic;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.9;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.why-choose-lines p.is-visible { opacity: 1; transform: translateY(0); }
+@media (max-width: 767px) {
+  #why-choose-section { padding: 44px 20px 52px; }
 }
 
 /* ═══════════════════════════════════════════════
@@ -450,38 +588,43 @@ body {
   .nav-logo { font-size: 1.5rem; }
   
   #hero-section {
-    height: 75vh;
-    min-height: 500px;
+    height: 78vh;
+    min-height: 520px;
+    max-height: 720px;
   }
   
   .dashboard-hero-bg {
     width: 100%;
-    -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
-    mask-image: linear-gradient(to bottom, black 40%, transparent 95%);
-    background-position: center center;
+    -webkit-mask-image: linear-gradient(to bottom, black 42%, transparent 92%);
+    mask-image: linear-gradient(to bottom, black 42%, transparent 92%);
+    background-position: center 22%;
     background-size: cover;
   }
   
   .dashboard-hero-gradient-overlay {
     background: 
-      linear-gradient(to top, #141414 5%, rgba(20,20,20, 0.5) 40%, transparent 70%),
-      linear-gradient(to right, rgba(20,20,20, 0.6) 0%, transparent 50%);
+      linear-gradient(to top, #141414 6%, rgba(20,20,20, 0.62) 36%, transparent 68%),
+      linear-gradient(to bottom, rgba(20,20,20, 0.42) 0%, transparent 28%);
   }
   
   .dashboard-hero-content {
-    padding: 70px 20px 100px;
-    justify-content: flex-end;
-    align-items: flex-start;
+    grid-template-columns: 1fr;
+    align-items: end;
+    padding: 76px 20px 32px;
+    gap: 0;
   }
   
   .dashboard-hero-left {
     max-width: 100%;
     margin-bottom: 0;
+    gap: 12px;
+    padding-top: 4px;
   }
   
   .dashboard-title {
-    font-size: clamp(2rem, 8vw, 3rem);
-    line-height: 1.1;
+    font-size: clamp(2.1rem, 10vw, 3.2rem);
+    line-height: 0.95;
+    letter-spacing: -1px;
   }
   
   .dashboard-badge {
@@ -490,6 +633,7 @@ body {
   
   .dashboard-buttons {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
   
   .dashboard-hero-right {

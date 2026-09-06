@@ -32,9 +32,9 @@ const CONFIG = {
   // ─── Dashboard Hero ─────────────────────────────────────────
   hero: {
     backgroundImage: "public/images/dashboard-hero.jpg",
-    title: "JIYA\n&\nSHLOK",
+    title: "ONCE\nUPON\nUS",
     badge: "Top 1 Most Passionate Couple",
-    tagline: "My Favorite Story ❤️",
+    tagline: "A story worth watching forever. ❤️",
     description: "You came into my life unexpectedly, and somehow you became my favorite part of it. Every memory with you feels like a scene I never want to end.",
     ctaPlay: "▶ PLAY OUR STORY",
     ctaList: "♡ MY LIST",
@@ -103,60 +103,59 @@ const CONFIG = {
   },
 
   // ─── Cinematic Photo Memory Sequence ────────────────────────
-  // Now chaptered — each is an Episode
+  // Each scene exactly 3s (3000) per request — image+chapter+title+description transition together
   memories: [
-    { chapter: "CHAPTER 01 — The Beginning", episode: "EPISODE 01 — HOW IT STARTED", image: "public/images/fav-1.jpg", title: "The Beginning", message: "I didn't know it then, but this was the beginning of my favorite story.", duration: 4200 },
-    { chapter: "CHAPTER 02 — You", episode: "EPISODE 02 — YOU", image: "public/images/fav-2.jpg", title: "You", message: "Somewhere along the way, you stopped being just someone I knew...", duration: 4200 },
-    { chapter: "CHAPTER 03 — Us", episode: "EPISODE 03 — US", image: "public/images/replay-2.jpg", title: "Us", message: "...and became the person I couldn't imagine my life without.", duration: 4200 },
-    { chapter: "CHAPTER 04 — My favorite smile", episode: "EPISODE 04 — MY FAVORITE PERSON", image: "public/images/fav-3.jpg", title: "My favorite smile", message: "Every picture here holds a piece of my heart.", duration: 4200 },
-    { chapter: "CHAPTER 05 — Laughing together", episode: "EPISODE 05 — EVERY LAUGH", image: "public/images/replay-4.jpg", title: "Laughing Together", message: "Your laugh is my favorite sound in the world.", duration: 4200 },
-    { chapter: "CHAPTER 06 — One of my best days", episode: "EPISODE 06 — BEST DAYS", image: "public/images/fav-5.jpg", title: "One of My Best Days", message: "You make the ordinary feel extraordinary.", duration: 4200 },
-    { chapter: "CHAPTER 07 — Adventures", episode: "EPISODE 07 — ADVENTURES", image: "public/images/replay-3.jpg", title: "Adventures", message: "Every adventure with you is my new favorite.", duration: 4200 },
-    { chapter: "FINAL CHAPTER — Forever", episode: "FINAL EPISODE — THE QUESTION", image: "public/images/fav-6.jpg", title: "Forever Favorite", message: "And this... this is just the beginning.", duration: 4800 }
+    { chapter: "CHAPTER 01 — The Beginning", episode: "EPISODE 01 — HOW IT STARTED", image: "public/images/fav-1.jpg", title: "The Beginning", message: "I didn't know it then, but this was the beginning of my favorite story.", duration: 3000 },
+    { chapter: "CHAPTER 02 — You", episode: "EPISODE 02 — YOU", image: "public/images/fav-2.jpg", title: "You", message: "Somewhere along the way, you stopped being just someone I knew...", duration: 3000 },
+    { chapter: "CHAPTER 03 — Us", episode: "EPISODE 03 — US", image: "public/images/replay-2.jpg", title: "Us", message: "...and became the person I couldn't imagine my life without.", duration: 3000 },
+    { chapter: "CHAPTER 04 — My favorite smile", episode: "EPISODE 04 — MY FAVORITE PERSON", image: "public/images/fav-3.jpg", title: "My favorite smile", message: "Every picture here holds a piece of my heart.", duration: 3000 },
+    { chapter: "CHAPTER 05 — Laughing together", episode: "EPISODE 05 — EVERY LAUGH", image: "public/images/replay-4.jpg", title: "Laughing Together", message: "Your laugh is my favorite sound in the world.", duration: 3000 },
+    { chapter: "CHAPTER 06 — One of my best days", episode: "EPISODE 06 — BEST DAYS", image: "public/images/fav-5.jpg", title: "One of My Best Days", message: "You make the ordinary feel extraordinary.", duration: 3000 },
+    { chapter: "CHAPTER 07 — Adventures", episode: "EPISODE 07 — ADVENTURES", image: "public/images/replay-3.jpg", title: "Adventures", message: "Every adventure with you is my new favorite.", duration: 3000 },
+    { chapter: "FINAL CHAPTER — Forever", episode: "FINAL EPISODE — THE QUESTION", image: "public/images/fav-6.jpg", title: "Forever Favorite", message: "And this... this is just the beginning.", duration: 3000 }
   ],
 
   // ─── Final CTA Button ──────────────────────────────────────
   finalCta: "ONE LAST THING...",
 
   // ─── Proposal Screen — Simple & Cinematic ───────────────────
+  // Keep these lines short — each appears with a 1.1s pause for emotional effect
   proposal: {
     backgroundImage: "public/images/feature-photo.jpg",
-    // Minimal lines that appear one by one with pauses
     simpleLines: [
       "Jiya...",
-      "Every memory...",
+      "After every memory...",
       "Every laugh...",
-      "Every little moment...",
+      "Every stupid little moment...",
       "You became my favorite part of all of it."
     ],
     questionIntro: "I have one question for you.",
-    question: "WILL YOU BE MINE?",
+    question: "WILL YOU BE MINE? ❤️",
     heart: "❤️",
     btnYes: "YES ❤️",
     btnYesCourse: "YES, OF COURSE ❤️",
     // Favorite photo that slowly appears before the question
     questionPhoto: "public/images/fav-6.jpg",
-    // YES evolution
+    // YES evolution — cinematic emotional
     celebrationStages: {
-      sheSaid: "She said...",
-      yes: "YES. ❤️",
-      nextChapter: "Our next chapter starts now.",
-      finalTitle: "JIYA ❤️ SHLOK"
+      sheSaid: "SHE SAID YES. ❤️",
+      yes: "SHE SAID YES. ❤️",
+      nextChapter: "And just like that…\nmy favorite story became our story.",
+      finalTitle: "Jiya ❤️ Shlok"
     },
     celebrationImage: "public/images/fav-6.jpg",
-    // Personal letter — replace with your own words!
+    // Personal letter — MAKE THIS YOUR OWN! Add inside jokes, dates, places only she knows
     letter: {
       buttonText: "One last thing... 💌",
       title: "For my Jiya,",
-      body: "I don't know what our next chapter looks like yet.\nI just know I want to be there for it — with you.\n\nThank you for becoming my favorite person, my favorite memory, and my favorite part of every day.\n\nYour laugh, your stupid cute jokes, our late night talks, even the way you always steal the blanket — it's all my favorite.\n\nThis isn't the end of our story.\nIt's the beginning. ❤️",
+      body: "Jiya,\n\nI don't know what our next chapter looks like yet.\nI just know I want to be there for it — with you.\n\nThank you for becoming my favorite person, my favorite memory, and my favorite part of every day.\n\nFrom our first photo together, to your stupid cute laugh when you're nervous, to every late-night talk and every song we played on repeat — it's all my favorite.\n\nThis isn't the end of our story.\nIt's the beginning. ❤️\n\nAlways yours,",
       sign: "— Shlok"
     }
   },
 
   // ─── Audio — different stages ───────────────────────────────
   audio: {
-    storySoundtrack: "public/audio/those-eyes.mp3",
-    storySoundtrackYoutubeId: "t1dvrcqlQgI",
+    storySoundtrack: "public/audio/New West - Those Eyes (Lyrics).mp3",
     backgroundMusic: "",        // dashboard ambient — leave empty for silent or add file
     photoMusic: "",             // soft emotional for photo sequence
     proposalMusic: "",          // quiet before question, rises after YES

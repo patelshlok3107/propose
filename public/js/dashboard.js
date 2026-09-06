@@ -29,6 +29,18 @@ const Dashboard = (() => {
       const taglineEl = heroSection.querySelector('.dashboard-tagline');
       if (taglineEl) taglineEl.textContent = CONFIG.hero.tagline;
 
+      // Netflix Original feel — tiny metadata under subtitle (only once)
+      if (taglineEl && !heroSection.querySelector('.hero-original-meta')) {
+        const metaWrap = document.createElement('div');
+        metaWrap.className = 'hero-original-meta';
+        metaWrap.innerHTML = `
+          <span class="hero-original-line">A SHLOK & JIYA ORIGINAL</span>
+          <span class="hero-original-dot">•</span>
+          <span class="hero-genre-line">Romance • Memories • Forever</span>
+        `;
+        taglineEl.insertAdjacentElement('afterend', metaWrap);
+      }
+
       const descEl = heroSection.querySelector('.dashboard-desc');
       if (descEl) descEl.innerHTML = CONFIG.hero.description.replace(/\n/g, '<br>');
 
@@ -104,6 +116,23 @@ const Dashboard = (() => {
           featureSection.querySelector('.feature-image-wrapper').style.background = 'linear-gradient(45deg, #1a0b12, #0a0a0a)';
         };
       }
+    }
+
+    // Why I Choose You — staggered fade
+    const whySection = document.getElementById('why-choose-section');
+    if (whySection) {
+      const lines = whySection.querySelectorAll('.why-choose-lines p');
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            lines.forEach((p, i) => {
+              setTimeout(() => p.classList.add('is-visible'), 300 + i * 420);
+            });
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+      obs.observe(whySection);
     }
 
     // Final CTA
