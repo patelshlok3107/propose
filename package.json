@@ -1,0 +1,12 @@
+{
+  "name": "our-story",
+  "version": "1.0.0",
+  "description": "A cinematic love story made for Jiya, by Shlok.",
+  "scripts": {
+    "build": "echo 'Static site — no build needed'",
+    "dev": "python -m http.server 8080"
+  },
+  "devDependencies": {
+    "sass": "^1.104.0"
+  }
+}

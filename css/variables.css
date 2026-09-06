@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Netflix-Inspired Romantic Theme
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* ── Backgrounds ─────────────────────────── */
+  --bg-primary:    #0a0a0a;
+  --bg-secondary:  #141414;
+  --bg-card:       #1a1a2e;
+  --bg-card-hover: #222240;
+  --bg-overlay:    rgba(0, 0, 0, 0.92);
+  --bg-modal:      rgba(10, 10, 10, 0.97);
+
+  /* ── Accent Colors ──────────────────────── */
+  --accent-red:    #e50914;
+  --accent-red-dark: #b20710;
+  --accent-pink:   #ff6b8a;
+  --accent-rose:   #c4395c;
+  --accent-gold:   #f5c518;
+  --accent-glow:   rgba(229, 9, 20, 0.35);
+  --accent-pink-glow: rgba(255, 107, 138, 0.25);
+
+  /* ── Text ───────────────────────────────── */
+  --text-primary:  #ffffff;
+  --text-secondary: #e5e5e5;
+  --text-muted:    #8c8c8c;
+  --text-romantic:  #ff6b8a;
+
+  /* ── Typography ─────────────────────────── */
+  --font-display:  'Outfit', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-romantic: 'Playfair Display', serif;
+
+  /* ── Sizing ─────────────────────────────── */
+  --radius-sm:     4px;
+  --radius-md:     8px;
+  --radius-lg:     16px;
+  --radius-xl:     24px;
+  --radius-full:   50%;
+
+  /* ── Shadows ────────────────────────────── */
+  --shadow-card:   0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 0 8px 40px rgba(229, 9, 20, 0.2);
+  --shadow-cinematic: 0 0 80px rgba(229, 9, 20, 0.15);
+  --shadow-glow:   0 0 30px rgba(255, 107, 138, 0.3);
+
+  /* ── Transitions ────────────────────────── */
+  --ease-smooth:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-bounce:   cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-cine:     cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast:  0.3s;
+  --duration-med:   0.5s;
+  --duration-slow:  0.8s;
+  --duration-cinematic: 1.2s;
+
+  /* ── Z-index layers ─────────────────────── */
+  --z-base:        1;
+  --z-cards:       10;
+  --z-modal:       100;
+  --z-intro:       1000;
+  --z-celebration: 2000;
+
+  /* ── Spacing ────────────────────────────── */
+  --space-xs:      4px;
+  --space-sm:      8px;
+  --space-md:      16px;
+  --space-lg:      24px;
+  --space-xl:      40px;
+  --space-2xl:     64px;
+  --space-3xl:     96px;
+}
