@@ -22,11 +22,12 @@ const CONFIG = {
   introAudio: "public/audio/Netflix intro - QuickSounds.com.mp3",
 
   // ─── Profile Selection ──────────────────────────────────────
+  // Each profile now uses a distinct provided photo — cropped with object-fit: cover, per-image positioning for perfect face framing
   profiles: [
-    { name: "The one who's always right", photo: "public/images/profile.jpg", isCorrect: false },
-    { name: "Knows the password", photo: "public/images/profile.jpg", isCorrect: false },
-    { name: "Guessed the password", photo: "public/images/profile.jpg", isCorrect: false },
-    { name: "Is the password ❤️", photo: "public/images/profile.jpg", isCorrect: true }
+    { name: "The one who's always right", photo: "public/images/profiles/profile-1.jpg", position: "50% 18%", isCorrect: false },
+    { name: "Knows the password", photo: "public/images/profiles/profile-2.jpg", position: "50% 32%", isCorrect: false },
+    { name: "Guessed the password", photo: "public/images/profiles/profile-3.jpg", position: "50% 28%", isCorrect: false },
+    { name: "Is the password ❤️", photo: "public/images/profiles/profile-4.jpg", position: "50% 22%", isCorrect: true }
   ],
 
   // ─── Dashboard Hero ─────────────────────────────────────────

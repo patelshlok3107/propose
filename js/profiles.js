@@ -18,14 +18,15 @@ const Profiles = (() => {
     if (!container) return;
     container.innerHTML = '';
 
-    CONFIG.profiles.forEach((profile) => {
+    CONFIG.profiles.forEach((profile, idx) => {
       const card = document.createElement('button');
       card.className = 'profile-card';
       card.setAttribute('aria-label', `Profile: ${profile.name}`);
 
+      const pos = profile.position || '50% 50%';
       card.innerHTML = `
         <div class="profile-image-wrapper">
-          <img class="profile-image" src="${profile.photo}" alt="${profile.name}">
+          <img class="profile-image" src="${profile.photo}" alt="${profile.name}" loading="eager" decoding="async" fetchpriority="${idx === 0 ? 'high' : 'low'}" style="object-position: ${pos};" onerror="this.style.display='none'">
         </div>
         <div class="profile-name">${profile.name}</div>
       `;
