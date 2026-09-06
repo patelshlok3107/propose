@@ -81,6 +81,16 @@ const CONFIG = {
 
   // ─── Story Video (Play Our Story experience) ────────────────
   storyVideo: "public/videos/vid-1.mp4",
+  storyTimeline: [
+    { type: "photo", source: "public/images/fav-1.jpg", start: 0, duration: 9, message: "Somehow, I found you.", animation: "slow-zoom" },
+    { type: "photo", source: "public/images/fav-2.jpg", start: 9, duration: 8, message: "Then you became my favorite person.", animation: "slow-pan" },
+    { type: "photo", source: "public/images/replay-2.jpg", start: 17, duration: 8, message: "Every little moment became a memory.", animation: "slow-zoom" },
+    { type: "photo", source: "public/images/fav-3.jpg", start: 25, duration: 7, message: "And every memory became a reason to love you more.", animation: "slow-pan" },
+    { type: "photo", source: "public/images/replay-4.jpg", start: 32, duration: 7, message: "Every laugh.", animation: "slow-zoom" },
+    { type: "photo", source: "public/images/fav-5.jpg", start: 39, duration: 8, message: "Us.", animation: "slow-pan" },
+    { type: "photo", source: "public/images/replay-3.jpg", start: 47, duration: 8, message: "My favorite story.", animation: "slow-zoom" },
+    { type: "photo", source: "public/images/fav-6.jpg", start: 55, duration: 13, message: "You.", animation: "slow-zoom" }
+  ],
 
   // ─── Cinematic Story Flow ───────────────────────────────────
   story: {
@@ -114,9 +124,10 @@ const CONFIG = {
     // Minimal lines that appear one by one with pauses
     simpleLines: [
       "Jiya...",
-      "After every memory...",
+      "Every memory...",
       "Every laugh...",
-      "Every stupid little moment..."
+      "Every little moment...",
+      "You became my favorite part of all of it."
     ],
     questionIntro: "I have one question for you.",
     question: "WILL YOU BE MINE?",
@@ -124,7 +135,7 @@ const CONFIG = {
     btnYes: "YES ❤️",
     btnYesCourse: "YES, OF COURSE ❤️",
     // Favorite photo that slowly appears before the question
-    questionPhoto: "public/images/fav-1.jpg",
+    questionPhoto: "public/images/fav-6.jpg",
     // YES evolution
     celebrationStages: {
       sheSaid: "She said...",
@@ -132,7 +143,7 @@ const CONFIG = {
       nextChapter: "Our next chapter starts now.",
       finalTitle: "JIYA ❤️ SHLOK"
     },
-    celebrationImage: "public/images/fav-1.jpg",
+    celebrationImage: "public/images/fav-6.jpg",
     // Personal letter — replace with your own words!
     letter: {
       buttonText: "One last thing... 💌",
@@ -144,6 +155,8 @@ const CONFIG = {
 
   // ─── Audio — different stages ───────────────────────────────
   audio: {
+    storySoundtrack: "public/audio/those-eyes.mp3",
+    storySoundtrackYoutubeId: "t1dvrcqlQgI",
     backgroundMusic: "",        // dashboard ambient — leave empty for silent or add file
     photoMusic: "",             // soft emotional for photo sequence
     proposalMusic: "",          // quiet before question, rises after YES

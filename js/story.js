@@ -1,34 +1,40 @@
 // ═══════════════════════════════════════════════
-//  STORY — Cinematic Story Player
-//  PLAY → BLACKOUT → SEASON → Previously → VIDEO → Interlude → Chapters → THE END → Proposal
+//  STORY — Cinematic Overlay (separate from Dashboard)
+//  PLAY → BLACKOUT → THOSE EYES (user gesture) → VIDEO → PHOTOS (synced) → PROPOSAL
+//  Dashboard DOM is NEVER modified — overlay sits on top.
 // ═══════════════════════════════════════════════
 
 const Story = (() => {
   let overlay, videoEl, controlsEl, progressEl, dotsEl;
-  let currentPhase = 'idle'; // idle | blackout | season | opening | video | interlude | memories | theend | done
-  let currentMemoryIndex = 0;
-  let memoryTimer = null;
-  let cinematicTimer = null;
+  let storyAudio = null; // Those Eyes — single instance
+  let youtubePlayer = null;
   let isOpen = false;
-  let touchStartX = 0;
-  let hasEndedOnce = false;
+  let currentPhase = 'idle'; // idle | blackout | season | opening | video | interlude | photos | final | done
+  let currentPhotoIndex = -1;
+  let timers = [];
+  let hasVideoEnded = false;
+  let hasAudioStarted = false;
 
   function init() {}
 
+  // ── Entry: called directly from PLAY OUR STORY click (user gesture) ──
   function start() {
     if (isOpen) return;
     isOpen = true;
     currentPhase = 'blackout';
-    hasEndedOnce = false;
+    hasVideoEnded = false;
+    hasAudioStarted = false;
+    currentPhotoIndex = -1;
 
+    // Do NOT modify dashboard DOM — just cover it with overlay
     const topNav = document.getElementById('top-nav');
     const mobileTop = document.getElementById('mobile-top-nav');
     const mobileBottom = document.getElementById('mobile-bottom-nav');
-    const mainContent = document.getElementById('main-content');
+    // We keep dashboard in DOM but hidden behind overlay via z-index; for clean cinematic we hide navs visually
     if (topNav) topNav.style.display = 'none';
     if (mobileTop) mobileTop.style.display = 'none';
     if (mobileBottom) mobileBottom.style.display = 'none';
-    if (mainContent) mainContent.style.display = 'none';
+    // Keep mainContent in DOM (do not alter) — overlay will cover it
 
     overlay = document.createElement('div');
     overlay.id = 'story-overlay';
@@ -72,6 +78,7 @@ const Story = (() => {
         </div>
         <button class="story-mem-exit" aria-label="Exit story">✕</button>
       </div>
+      <div id="story-youtube-wrap" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;"></div>
       <div class="story-vignette"></div>
     `;
     document.body.appendChild(overlay);
@@ -82,24 +89,138 @@ const Story = (() => {
     progressEl = overlay.querySelector('.story-progress-fill');
     dotsEl = overlay.querySelector('.story-memory-dots');
 
-    // Build dots
-    if (dotsEl && CONFIG.memories) {
-      CONFIG.memories.forEach((_, i) => {
+    // Build dots for all story photos (use storyTimeline or memories)
+    const photos = getStoryPhotos();
+    if (dotsEl && photos) {
+      photos.forEach((_, i) => {
         const dot = document.createElement('div');
         dot.className = 'story-dot' + (i === 0 ? ' active' : '');
-        dot.addEventListener('click', () => goToMemory(i));
+        dot.addEventListener('click', () => goToPhoto(i));
         dotsEl.appendChild(dot);
       });
     }
 
     setupEvents();
 
-    // Phase 1: Blackout → Season → Opening → Video
+    // ── START MUSIC FROM PLAY CLICK (user gesture) ──
+    // Create/load audio synchronously inside click handler
+    createStoryAudio();
+
+    // Blackout → Season → Opening → Video
     setTimeout(() => {
       const blackout = overlay.querySelector('.story-blackout');
       blackout.classList.add('active');
-      setTimeout(() => showSeasonCard(), 900);
+      setTimeout(() => showSeasonCard(), 800);
     }, 100);
+  }
+
+  function getStoryPhotos() {
+    // Prefer explicit storyTimeline (has start/duration for sync), else memories
+    if (CONFIG.storyTimeline && CONFIG.storyTimeline.length) return CONFIG.storyTimeline;
+    if (CONFIG.memories && CONFIG.memories.length) return CONFIG.memories;
+    // Fallback: collect all photos from dashboard mediaRows
+    const all = [];
+    if (CONFIG.mediaRows) {
+      CONFIG.mediaRows.forEach(row => {
+        row.items.forEach(item => {
+          if (item.type === 'photo') all.push({ image: item.src, source: item.src, title: item.title, message: item.message, duration: 4200 });
+        });
+      });
+    }
+    return all;
+  }
+
+  function getTimeline() {
+    // Use storyTimeline if available (has start/end), else build from memories
+    if (CONFIG.storyTimeline && CONFIG.storyTimeline.length) return CONFIG.storyTimeline;
+    const mems = CONFIG.memories || [];
+    return mems.map((m, i) => ({
+      source: m.image || m.source,
+      image: m.image || m.source,
+      title: m.title,
+      message: m.message,
+      chapter: m.chapter,
+      episode: m.episode,
+      start: i * 8,
+      duration: (m.duration || 4200) / 1000
+    }));
+  }
+
+  function createStoryAudio() {
+    // Clean previous
+    if (storyAudio) {
+      try { storyAudio.pause(); storyAudio.src = ''; } catch(e) {}
+      storyAudio = null;
+    }
+    if (youtubePlayer) {
+      try { youtubePlayer.remove(); } catch(e) {}
+      youtubePlayer = null;
+    }
+
+    const src = CONFIG.audio && CONFIG.audio.storySoundtrack;
+    const youtubeId = CONFIG.audio && CONFIG.audio.storySoundtrackYoutubeId;
+
+    // Try HTMLAudio first if file exists
+    if (src) {
+      storyAudio = new Audio();
+      storyAudio.preload = 'auto';
+      storyAudio.loop = false;
+      storyAudio.volume = 0.85;
+      storyAudio.src = src;
+
+      // If file 404, error event will fire → fallback to YouTube
+      storyAudio.addEventListener('error', () => {
+        console.warn('[Story] Those Eyes audio file not found:', src, '— falling back to YouTube');
+        try { storyAudio.pause(); } catch(e) {}
+        storyAudio = null;
+        if (youtubeId) createYoutubePlayer(youtubeId);
+        else console.error('[Story] No YouTube fallback configured. Place file at', src);
+      });
+
+      storyAudio.addEventListener('ended', () => {
+        console.log('[Story] Those Eyes ended — visual sequence will finish naturally');
+        // Do not restart, do not loop — let photos finish then proposal
+      });
+
+      // Attempt play as user gesture — handle promise
+      storyAudio.currentTime = 0;
+      const p = storyAudio.play();
+      if (p && typeof p.then === 'function') {
+        p.then(() => {
+          hasAudioStarted = true;
+          console.log('[Story] Those Eyes playing');
+        }).catch((err) => {
+          console.error('[Story] Audio playback failed:', err);
+          // Fallback to YouTube if available
+          if (youtubeId) {
+            storyAudio = null;
+            createYoutubePlayer(youtubeId);
+          }
+        });
+      } else {
+        hasAudioStarted = true;
+      }
+    } else if (youtubeId) {
+      createYoutubePlayer(youtubeId);
+    } else {
+      console.warn('[Story] No storySoundtrack configured');
+    }
+  }
+
+  function createYoutubePlayer(youtubeId) {
+    const wrap = document.getElementById('story-youtube-wrap');
+    if (!wrap || !youtubeId) return;
+    // Use YouTube iframe with JS API not required — simple embed autoplay
+    const iframe = document.createElement('iframe');
+    iframe.width = '1';
+    iframe.height = '1';
+    iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&controls=0&loop=0&rel=0&enablejsapi=1`;
+    iframe.allow = 'autoplay; encrypted-media';
+    iframe.style.border = '0';
+    wrap.appendChild(iframe);
+    youtubePlayer = iframe;
+    hasAudioStarted = true;
+    console.log('[Story] YouTube fallback playing:', youtubeId);
   }
 
   function showSeasonCard() {
@@ -108,18 +229,17 @@ const Story = (() => {
     const title = card.querySelector('.story-season-title');
     const sub = card.querySelector('.story-season-subtitle');
     const line = card.querySelector('.story-cinematic-line');
-    const sub2 = card.querySelector('.story-cinematic-sub');
     const s = CONFIG.story || {};
     title.textContent = s.seasonTitle || 'JIYA & SHLOK';
     sub.textContent = s.seasonSubtitle || 'Season 1';
     line.textContent = '';
-    sub2.textContent = '';
+    card.querySelector('.story-cinematic-sub').textContent = '';
     card.classList.add('active');
-    // season card 2s then opening
-    cinematicTimer = setTimeout(() => {
+    const t = setTimeout(() => {
       card.classList.remove('active');
       setTimeout(showOpeningCard, 700);
     }, 2200);
+    timers.push(t);
   }
 
   function showOpeningCard() {
@@ -131,18 +251,18 @@ const Story = (() => {
     title.textContent = '';
     sub.textContent = '';
     line.textContent = (CONFIG.story && CONFIG.story.openingLine) || "Previously, in a story I never expected to live...";
-    const subEl = card.querySelector('.story-cinematic-sub');
-    subEl.textContent = '';
+    card.querySelector('.story-cinematic-sub').textContent = '';
     card.classList.add('active');
-    cinematicTimer = setTimeout(() => {
+    const t = setTimeout(() => {
       card.classList.remove('active');
       setTimeout(() => startVideo(), 800);
     }, 3200);
+    timers.push(t);
   }
 
   function setupEvents() {
     overlay.querySelectorAll('.story-exit-btn, .story-mem-exit').forEach(btn => {
-      btn.addEventListener('click', close);
+      btn.addEventListener('click', () => close(true));
     });
     const playPauseBtn = overlay.querySelector('.story-play-pause');
     const iconPause = overlay.querySelector('.story-icon-pause');
@@ -152,10 +272,13 @@ const Story = (() => {
         videoEl.play();
         iconPause.style.display = '';
         iconPlay.style.display = 'none';
+        // lower music while video resumes
+        if (storyAudio && !storyAudio.paused) storyAudio.volume = 0.22;
       } else {
         videoEl.pause();
         iconPause.style.display = 'none';
         iconPlay.style.display = '';
+        if (storyAudio && !storyAudio.paused) storyAudio.volume = 0.35;
       }
     });
     videoEl.addEventListener('timeupdate', () => {
@@ -164,10 +287,9 @@ const Story = (() => {
         if (progressEl) progressEl.style.width = pct + '%';
       }
     });
-    // Video ended → interlude → memories (use actual ended event)
     videoEl.addEventListener('ended', () => {
-      if (hasEndedOnce) return;
-      hasEndedOnce = true;
+      if (hasVideoEnded) return;
+      hasVideoEnded = true;
       transitionToInterlude();
     });
     const videoContainer = overlay.querySelector('.story-video-container');
@@ -178,17 +300,18 @@ const Story = (() => {
       clearTimeout(controlsTimeout);
       controlsTimeout = setTimeout(() => controlsEl.classList.remove('visible'), 3000);
     });
-    overlay.querySelector('.story-mem-prev')?.addEventListener('click', prevMemory);
-    overlay.querySelector('.story-mem-next')?.addEventListener('click', nextMemory);
+    overlay.querySelector('.story-mem-prev')?.addEventListener('click', prevPhoto);
+    overlay.querySelector('.story-mem-next')?.addEventListener('click', nextPhoto);
     const memContainer = overlay.querySelector('.story-memory-container');
+    let touchStartX = 0;
     memContainer?.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
     memContainer?.addEventListener('touchend', (e) => {
       const diff = touchStartX - e.changedTouches[0].screenX;
       if (Math.abs(diff) > 50) {
-        if (diff > 0) nextMemory();
-        else prevMemory();
+        if (diff > 0) nextPhoto();
+        else prevPhoto();
       }
     }, { passive: true });
     document.addEventListener('keydown', handleKeydown);
@@ -196,28 +319,31 @@ const Story = (() => {
 
   function handleKeydown(e) {
     if (!isOpen) return;
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') close(true);
     if (currentPhase === 'video') {
       if (e.key === ' ') { e.preventDefault(); videoEl.paused ? videoEl.play() : videoEl.pause(); }
     }
-    if (currentPhase === 'memories') {
-      if (e.key === 'ArrowRight' || e.key === ' ') nextMemory();
-      if (e.key === 'ArrowLeft') prevMemory();
+    if (currentPhase === 'photos') {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextPhoto();
+      if (e.key === 'ArrowLeft') prevPhoto();
     }
   }
 
   function startVideo() {
     currentPhase = 'video';
     const videoContainer = overlay.querySelector('.story-video-container');
-    // ensure cinematic hidden
     const card = overlay.querySelector('.story-cinematic');
     card.classList.remove('active');
     videoContainer.classList.add('active');
     videoEl.src = CONFIG.storyVideo;
     videoEl.loop = false;
+    videoEl.volume = 1.0;
+    // Lower Those Eyes while video audio is important
+    if (storyAudio && !storyAudio.paused) storyAudio.volume = 0.22;
+    if (youtubePlayer) {
+      // YouTube volume can't be controlled without API — keep as is
+    }
     videoEl.load();
-    // try photo music pause, video audio is own
-    pausePhotoMusic();
     videoEl.play().catch(() => {
       const iconPause = overlay.querySelector('.story-icon-pause');
       const iconPlay = overlay.querySelector('.story-icon-play');
@@ -227,14 +353,14 @@ const Story = (() => {
   }
 
   function transitionToInterlude() {
-    if (!isOpen || hasEndedOnce === false) hasEndedOnce = true;
-    // Fade video to black
+    if (!isOpen || currentPhase === 'photos' || currentPhase === 'final') return;
+    currentPhase = 'interlude';
     const videoContainer = overlay.querySelector('.story-video-container');
     videoContainer.classList.remove('active');
     videoContainer.classList.add('fading');
-    videoEl.pause();
-    videoEl.src = '';
-    videoEl.load();
+    // Restore music volume after video
+    if (storyAudio && !storyAudio.paused) storyAudio.volume = 0.35;
+    try { videoEl.pause(); videoEl.src = ''; videoEl.load(); } catch(e) {}
     setTimeout(() => {
       videoContainer.style.display = 'none';
       showInterlude();
@@ -251,21 +377,92 @@ const Story = (() => {
     sub.textContent = '';
     line.textContent = (CONFIG.story && CONFIG.story.interludeLine) || "And somehow… every chapter led me to you.";
     card.classList.add('active');
-    // start soft photo music if available
-    playPhotoMusic();
-    cinematicTimer = setTimeout(() => {
+    const t = setTimeout(() => {
       card.classList.remove('active');
-      setTimeout(() => {
-        currentMemoryIndex = 0;
-        showMemory(0);
-      }, 800);
+      setTimeout(() => startPhotoSequence(), 800);
     }, 2800);
+    timers.push(t);
   }
 
-  function showMemory(index) {
-    if (index < 0 || index >= CONFIG.memories.length) return;
-    currentMemoryIndex = index;
-    const memory = CONFIG.memories[index];
+  function startPhotoSequence() {
+    currentPhase = 'photos';
+    // If song is playing, sync to it; else use timer fallback
+    if (storyAudio && hasAudioStarted && !storyAudio.paused && storyAudio.duration > 0) {
+      startSyncedPhotos();
+    } else if (youtubePlayer) {
+      // YouTube fallback — use timer fallback (no timeupdate)
+      startTimerPhotos();
+    } else {
+      // No audio — timer fallback
+      startTimerPhotos();
+    }
+  }
+
+  function startSyncedPhotos() {
+    const timeline = getTimeline();
+    let lastIndex = -1;
+    const onTimeUpdate = () => {
+      if (!isOpen || currentPhase !== 'photos') return;
+      const t = storyAudio.currentTime;
+      // Find current photo based on timeline
+      let idx = -1;
+      for (let i = 0; i < timeline.length; i++) {
+        const start = timeline[i].start;
+        const end = start + timeline[i].duration;
+        if (t >= start && t < end) { idx = i; break; }
+      }
+      // If past last, idx = last
+      if (idx === -1 && t >= 0) {
+        if (t >= timeline[timeline.length-1].start) idx = timeline.length-1;
+        else idx = 0;
+      }
+      if (idx !== -1 && idx !== lastIndex) {
+        lastIndex = idx;
+        showPhoto(idx, timeline[idx]);
+      }
+      // If song ended, finish after last photo duration
+      if (storyAudio.ended) {
+        storyAudio.removeEventListener('timeupdate', onTimeUpdate);
+        // Show final photo longer then proposal
+        const finalIdx = timeline.length - 1;
+        if (lastIndex !== finalIdx) showPhoto(finalIdx, timeline[finalIdx]);
+        setTimeout(() => showTheEnd(), (timeline[finalIdx].duration * 1000) + 800);
+      }
+    };
+    storyAudio.addEventListener('timeupdate', onTimeUpdate);
+    // Also handle ended
+    storyAudio.addEventListener('ended', () => {
+      storyAudio.removeEventListener('timeupdate', onTimeUpdate);
+      setTimeout(() => showTheEnd(), 1200);
+    });
+    // Trigger first
+    onTimeUpdate();
+    // Fallback if audio is shorter than visual: ensure we still progress even if timeupdate stalls
+    // Keep timer for final transition as safety
+    const totalDuration = timeline.reduce((sum, item) => sum + item.duration, 0) * 1000;
+    const t = setTimeout(() => {
+      if (currentPhase === 'photos') showTheEnd();
+    }, totalDuration + 4000);
+    timers.push(t);
+  }
+
+  function startTimerPhotos() {
+    const photos = getStoryPhotos();
+    let idx = 0;
+    function next() {
+      if (!isOpen || currentPhase !== 'photos') return;
+      if (idx >= photos.length) { showTheEnd(); return; }
+      showPhoto(idx, photos[idx]);
+      const dur = (photos[idx].duration || 4200);
+      const t = setTimeout(() => { idx++; next(); }, dur);
+      timers.push(t);
+    }
+    next();
+  }
+
+  function showPhoto(index, data) {
+    if (index < 0) return;
+    currentPhotoIndex = index;
     const memContainer = overlay.querySelector('.story-memory-container');
     const memImg = overlay.querySelector('.story-memory-img');
     const memTitle = overlay.querySelector('.story-memory-title');
@@ -274,120 +471,143 @@ const Story = (() => {
     const chapterEl = overlay.querySelector('.story-chapter-label');
     const episodeEl = overlay.querySelector('.story-episode-label');
 
+    if (!memContainer) return;
     memContainer.classList.add('active');
-    memImg.src = memory.image;
-    memImg.alt = memory.title || '';
-    memBg.style.backgroundImage = `url('${memory.image}')`;
-    if (chapterEl) chapterEl.textContent = memory.chapter || '';
-    if (episodeEl) episodeEl.textContent = memory.episode || '';
-    memTitle.textContent = memory.title || '';
-    memMsg.textContent = memory.message || '';
 
-    memContainer.classList.remove('fade-out');
-    memContainer.classList.add('fade-in');
+    const src = data.source || data.image || data.src;
+    const title = data.title || '';
+    const message = data.message || '';
+    const chapter = data.chapter || '';
+    const episode = data.episode || '';
 
-    if (dotsEl) {
-      dotsEl.querySelectorAll('.story-dot').forEach((d, i) => {
-        d.classList.toggle('active', i === index);
-      });
-    }
-
-    clearTimeout(memoryTimer);
-    const duration = memory.duration || 4200;
-    if (index === CONFIG.memories.length - 1) {
-      memoryTimer = setTimeout(() => {
-        showTheEnd();
-      }, duration);
-    } else {
-      memoryTimer = setTimeout(() => {
-        nextMemory();
-      }, duration);
-    }
-  }
-
-  function nextMemory() {
-    clearTimeout(memoryTimer);
-    clearTimeout(cinematicTimer);
-    if (currentMemoryIndex < CONFIG.memories.length - 1) {
-      const memContainer = overlay.querySelector('.story-memory-container');
+    // Crossfade: fade-out previous then fade-in new if already visible
+    const isFirst = !memContainer.classList.contains('fade-in');
+    if (!isFirst) {
       memContainer.classList.add('fade-out');
       memContainer.classList.remove('fade-in');
       setTimeout(() => {
-        showMemory(currentMemoryIndex + 1);
-      }, 600);
+        setPhotoContent();
+        memContainer.classList.remove('fade-out');
+        memContainer.classList.add('fade-in');
+      }, 380);
+    } else {
+      setPhotoContent();
+      memContainer.classList.remove('fade-out');
+      memContainer.classList.add('fade-in');
+    }
+
+    function setPhotoContent() {
+      memImg.src = src;
+      memImg.alt = title;
+      memBg.style.backgroundImage = `url('${src}')`;
+      if (chapterEl) chapterEl.textContent = chapter;
+      if (episodeEl) episodeEl.textContent = episode;
+      memTitle.textContent = title;
+      memMsg.textContent = message;
+      // Update dots
+      if (dotsEl) {
+        dotsEl.querySelectorAll('.story-dot').forEach((d, i) => {
+          d.classList.toggle('active', i === index);
+        });
+      }
+    }
+  }
+
+  function nextPhoto() {
+    const photos = getStoryPhotos();
+    if (currentPhotoIndex < photos.length - 1) {
+      // If synced mode, just let timeupdate drive it — but allow manual override
+      if (storyAudio && hasAudioStarted && !storyAudio.paused) {
+        // Seek audio forward by ~8s
+        try { storyAudio.currentTime += 8; } catch(e) {}
+      } else {
+        showPhoto(currentPhotoIndex + 1, photos[currentPhotoIndex + 1]);
+      }
     } else {
       showTheEnd();
     }
   }
 
-  function prevMemory() {
-    clearTimeout(memoryTimer);
-    if (currentMemoryIndex > 0) {
-      const memContainer = overlay.querySelector('.story-memory-container');
-      memContainer.classList.add('fade-out');
-      memContainer.classList.remove('fade-in');
-      setTimeout(() => {
-        showMemory(currentMemoryIndex - 1);
-      }, 600);
+  function prevPhoto() {
+    const photos = getStoryPhotos();
+    if (currentPhotoIndex > 0) {
+      if (storyAudio && hasAudioStarted && !storyAudio.paused) {
+        try { storyAudio.currentTime = Math.max(0, storyAudio.currentTime - 8); } catch(e) {}
+      } else {
+        showPhoto(currentPhotoIndex - 1, photos[currentPhotoIndex - 1]);
+      }
     }
   }
 
-  function goToMemory(index) {
-    clearTimeout(memoryTimer);
-    if (index >= 0 && index < CONFIG.memories.length) {
-      const memContainer = overlay.querySelector('.story-memory-container');
-      memContainer.classList.add('fade-out');
-      memContainer.classList.remove('fade-in');
-      setTimeout(() => {
-        showMemory(index);
-      }, 400);
+  function goToPhoto(index) {
+    const photos = getStoryPhotos();
+    if (index >= 0 && index < photos.length) {
+      if (storyAudio && hasAudioStarted && !storyAudio.paused && getTimeline()[index]) {
+        try { storyAudio.currentTime = getTimeline()[index].start + 0.2; } catch(e) {}
+      } else {
+        showPhoto(index, photos[index]);
+      }
     }
   }
 
   function showTheEnd() {
-    if (currentPhase === 'theend' || currentPhase === 'done') return;
-    currentPhase = 'theend';
-    clearTimeout(memoryTimer);
+    if (currentPhase === 'final' || currentPhase === 'done') return;
+    currentPhase = 'final';
+    clearTimers();
+    // Soften music
+    if (storyAudio && !storyAudio.paused) {
+      let v = storyAudio.volume;
+      const fade = setInterval(() => {
+        v -= 0.06;
+        if (v <= 0.12) { storyAudio.volume = 0.12; clearInterval(fade); }
+        else storyAudio.volume = v;
+      }, 150);
+    }
     const memContainer = overlay.querySelector('.story-memory-container');
-    memContainer.classList.add('fade-out');
-    memContainer.classList.remove('fade-in');
-    // lower photo music before THE END
-    lowerPhotoMusic();
+    if (memContainer) {
+      memContainer.classList.add('fade-out');
+      memContainer.classList.remove('fade-in');
+    }
     setTimeout(() => {
-      memContainer.classList.remove('active');
-      memContainer.style.display = 'none';
+      if (memContainer) {
+        memContainer.classList.remove('active');
+        memContainer.style.display = 'none';
+      }
       const card = overlay.querySelector('.story-cinematic');
       const title = card.querySelector('.story-season-title');
       const line = card.querySelector('.story-cinematic-line');
       const sub = card.querySelector('.story-cinematic-sub');
       title.textContent = '';
+      sub.textContent = '';
       line.textContent = (CONFIG.story && CONFIG.story.theEnd) || 'THE END';
       line.style.letterSpacing = '6px';
       line.style.fontSize = 'clamp(1.4rem, 4vw, 2rem)';
       line.style.fontWeight = '800';
-      sub.textContent = '';
+      line.style.fontStyle = 'normal';
+      line.style.fontFamily = 'var(--font-display)';
       card.classList.add('active');
-      cinematicTimer = setTimeout(() => {
+      const t1 = setTimeout(() => {
         line.textContent = (CONFIG.story && CONFIG.story.orMaybe) || '...or maybe, our beginning.';
         line.style.letterSpacing = '0.5px';
         line.style.fontSize = 'clamp(1rem, 2.8vw, 1.3rem)';
         line.style.fontWeight = '400';
         line.style.fontStyle = 'italic';
         line.style.fontFamily = 'var(--font-romantic)';
-        cinematicTimer = setTimeout(() => {
+        const t2 = setTimeout(() => {
           card.classList.remove('active');
           setTimeout(() => finishAndPropose(), 700);
         }, 2400);
+        timers.push(t2);
       }, 2100);
+      timers.push(t1);
     }, 700);
   }
 
   function finishAndPropose() {
     if (currentPhase === 'done') return;
     currentPhase = 'done';
-    clearTimeout(memoryTimer);
-    clearTimeout(cinematicTimer);
-    pausePhotoMusic();
+    clearTimers();
+    // Keep music at low volume for proposal
     const memContainer = overlay.querySelector('.story-memory-container');
     if (memContainer) {
       memContainer.classList.add('fade-out');
@@ -401,46 +621,35 @@ const Story = (() => {
         memContainer.style.display = 'none';
       }
       overlay.classList.add('fading');
-      document.body.style.overflow = '';
       setTimeout(() => {
         close(false);
         Proposal.reveal();
+        // Proposal will handle music rise after YES
       }, 1000);
     }, 600);
   }
 
-  // ── Audio helpers ──
-  let photoAudio = null;
-  function playPhotoMusic() {
-    if (!CONFIG.audio || !CONFIG.audio.photoMusic) return;
-    if (!photoAudio) {
-      photoAudio = new Audio(CONFIG.audio.photoMusic);
-      photoAudio.loop = true;
-      photoAudio.volume = 0.35;
-    }
-    photoAudio.play().catch(()=>{});
-  }
-  function pausePhotoMusic() {
-    if (photoAudio) { try { photoAudio.pause(); } catch(e){} }
-  }
-  function lowerPhotoMusic() {
-    if (photoAudio && !photoAudio.paused) {
-      let v = photoAudio.volume;
-      const fade = setInterval(() => {
-        v -= 0.04;
-        if (v <= 0.08) { photoAudio.volume = 0.08; clearInterval(fade); }
-        else photoAudio.volume = v;
-      }, 120);
-    }
+  function clearTimers() {
+    timers.forEach(t => clearTimeout(t));
+    timers = [];
   }
 
   function close(restoreDashboard = true) {
     if (!isOpen && !overlay) return;
     isOpen = false;
-    clearTimeout(memoryTimer);
-    clearTimeout(cinematicTimer);
+    clearTimers();
     currentPhase = 'idle';
-    pausePhotoMusic();
+    currentPhotoIndex = -1;
+    hasVideoEnded = false;
+    // Pause and clean audio (do not garbage collect immediately — keep for resume)
+    if (storyAudio) {
+      try { storyAudio.pause(); } catch(e) {}
+      storyAudio.removeEventListener('timeupdate', ()=>{});
+      // Keep storyAudio for potential replay, but reset
+    }
+    if (youtubePlayer) {
+      try { youtubePlayer.src = ''; } catch(e) {}
+    }
     if (videoEl) {
       try { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.load(); } catch(e) {}
     }
@@ -459,6 +668,13 @@ const Story = (() => {
       if (mobileTop) mobileTop.style.display = '';
       if (mobileBottom) mobileBottom.style.display = '';
       if (mainContent) { mainContent.style.display = 'block'; mainContent.style.opacity = '1'; }
+      // Pause story audio fully on exit
+      if (storyAudio) {
+        try { storyAudio.pause(); storyAudio.currentTime = 0; } catch(e) {}
+      }
+      if (youtubePlayer) {
+        try { youtubePlayer.remove(); youtubePlayer = null; } catch(e) {}
+      }
     }
   }
 
