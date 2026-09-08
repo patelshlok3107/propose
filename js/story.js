@@ -211,10 +211,25 @@ const Story = (() => {
     overlay.querySelector('.story-blackout').classList.remove('active');
     storyVideo.src = CONFIG.storyVideo;
     storyVideo.load();
+    storyVideo.muted = true;
+    storyVideo.playsInline = true;
     storyVideo.volume = 0.72;
     if (storyAudio && !storyAudio.paused) storyAudio.volume = 0.18;
     const p = storyVideo.play();
-    if (p && typeof p.catch === 'function') p.catch(showVideoError);
+    if (p && typeof p.catch === 'function') {
+      p.then(() => {
+        // Try to unmute after play started (user gesture allows it)
+        try { storyVideo.muted = false; } catch(e){}
+      }).catch((e) => {
+        console.warn('[Story] video autoplay blocked, showing controls', e);
+        storyVideo.controls = true;
+        storyVideo.muted = true;
+        // Try muted autoplay
+        storyVideo.play().catch(showVideoError);
+      });
+    }
+    // Ensure video is visible — portrait 480x848 will be centered with contain
+    storyVideo.style.objectFit = 'contain';
     delay(() => { if (phase === 'video' && storyVideo.paused && storyVideo.currentTime === 0) handleVideoEnded(); }, 7000);
   }
 
@@ -361,45 +376,17 @@ const Story = (() => {
     const lineEl = prop.querySelector('.emotional-line');
     const shade = prop.querySelector('.story-proposal-shade');
 
-    // 1. Black silence 2-3s (already black), then Jiya...
+    // 1. Black silence 2-3s, then Jiya... — keep minimal, let silence do the work
     delay(() => {
-      // shade stays black
       lineEl.textContent = 'Jiya...';
       lineEl.style.fontFamily = 'var(--font-romantic)';
       lineEl.style.fontStyle = 'italic';
       lineEl.style.fontSize = 'clamp(1.6rem,4vw,2.2rem)';
       requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
     }, 2400);
-
-    const lines = [
-      'Do you remember all those little moments?',
-      'The laughs.',
-      'The random conversations.',
-      'The days that somehow became memories.',
-      "I didn't know it then...",
-      'but I was slowly falling for you.',
-      'And now, I have one question.'
-    ];
-    let t = 2400 + 2200; // after Jiya hold
-    // Fade out Jiya then cycle through lines
-    delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
-    t += 700;
-    lines.forEach((txt, i) => {
-      delay(() => {
-        lineEl.textContent = txt;
-        lineEl.style.fontFamily = 'var(--font-romantic)';
-        lineEl.style.fontStyle = 'italic';
-        lineEl.style.fontSize = 'clamp(1rem,2.6vw,1.35rem)';
-        lineEl.style.opacity = '0';
-        lineEl.style.transform = 'translateY(12px)';
-        requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
-      }, t);
-      t += 1650;
-      delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
-      t += 600;
-    });
-    // After emotional lines, memory flash
-    delay(() => { startMemoryFlash(prop); }, t + 400);
+    // Brief hold on her name, then memory flash — no long monologue
+    delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, 2400 + 1800);
+    delay(() => { startMemoryFlash(prop); }, 2400 + 1800 + 700);
   }
 
   function startMemoryFlash(prop) {
@@ -444,25 +431,9 @@ const Story = (() => {
     lineEl.style.opacity = '0';
     lineEl.style.transform = 'translateY(12px)';
     let t = 700;
-    // 3. ONE LAST TRUTH...
+    // Keep only the strongest lines — let silence + visuals do the rest
     delay(() => {
-      lineEl.textContent = 'ONE LAST TRUTH...';
-      lineEl.style.fontFamily = 'var(--font-body)';
-      lineEl.style.fontStyle = 'normal';
-      lineEl.style.fontWeight = '600';
-      lineEl.style.fontSize = '0.62rem';
-      lineEl.style.letterSpacing = '3.5px';
-      lineEl.style.textTransform = 'uppercase';
-      lineEl.style.color = 'rgba(255,255,255,0.52)';
-      lineEl.style.textShadow = 'none';
-      requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
-    }, t);
-    t += 1600;
-    delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
-    t += 600;
-    // Somewhere along the way... — elegant, readable, one block
-    delay(() => {
-      lineEl.innerHTML = 'Somewhere along the way,<br>you stopped being just a part of my life...<br>and became my favorite part of it.';
+      lineEl.innerHTML = 'Somewhere along the way,<br>you became my favorite part of life.';
       lineEl.style.fontFamily = 'var(--font-romantic)';
       lineEl.style.fontStyle = 'italic';
       lineEl.style.fontWeight = '400';
@@ -471,12 +442,13 @@ const Story = (() => {
       lineEl.style.textTransform = 'none';
       lineEl.style.color = 'rgba(255,255,255,0.88)';
       lineEl.style.lineHeight = '1.7';
+      lineEl.style.textShadow = 'none';
       requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
     }, t);
-    t += 2400;
+    t += 2000;
     delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
     t += 600;
-    // 4. CONNECT THOSE EYES
+    // Those Eyes — short, then immediate proposal
     delay(() => {
       lineEl.textContent = 'And then there were those eyes...';
       lineEl.style.fontFamily = 'var(--font-romantic)';
@@ -489,33 +461,22 @@ const Story = (() => {
     delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
     t += 600;
     delay(() => {
-      lineEl.innerHTML = 'The kind I could look at<br>and somehow forget what I was about to say.';
+      lineEl.innerHTML = 'The ones I could look at<br>and forget what I was about to say.';
       requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
     }, t);
-    t += 1800;
+    t += 1700;
     delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
     t += 600;
-    // Original question sequence continues
     delay(() => {
-      lineEl.textContent = 'After everything we\'ve shared...';
+      lineEl.textContent = "I don't want this story to end here.";
       lineEl.style.fontFamily = 'var(--font-romantic)';
       lineEl.style.fontStyle = 'italic';
       lineEl.style.fontSize = 'clamp(1rem,2.6vw,1.3rem)';
       lineEl.style.color = 'rgba(255,255,255,0.88)';
       lineEl.style.fontWeight = '400';
-      lineEl.style.letterSpacing = '0';
-      lineEl.style.textTransform = 'none';
-      lineEl.style.textShadow = 'none';
       requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
     }, t);
-    t += 1600;
-    delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
-    t += 600;
-    delay(() => {
-      lineEl.textContent = "I don't want this story to end here.";
-      requestAnimationFrame(() => { lineEl.style.opacity = '1'; lineEl.style.transform = 'translateY(0)'; });
-    }, t);
-    t += 1600;
+    t += 1700;
     delay(() => { lineEl.style.opacity = '0'; lineEl.style.transform = 'translateY(-8px)'; }, t);
     t += 600;
     delay(() => {
@@ -752,10 +713,6 @@ const Story = (() => {
           <p class="movie-credit-value">Jiya</p>
           <p class="movie-credit-sub">The One Who Changed Everything</p>
           <p class="movie-credit-value" style="margin-top:10px;">Shlok</p>
-          <p class="movie-credit-label">Written by</p>
-          <p class="movie-credit-value large">The moments we shared</p>
-          <p class="movie-credit-label">Produced by</p>
-          <p class="movie-credit-value large">Fate</p>
           <p class="movie-credit-label">Soundtrack</p>
           <p class="movie-credit-value large">Those Eyes</p>
           <p class="movie-credit-label">Genre</p>

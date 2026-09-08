@@ -3,13 +3,17 @@
    ═══════════════════════════════════════════════ */
 
 :root {
-  /* ── Backgrounds ─────────────────────────── */
-  --bg-primary:    #0a0a0a;
-  --bg-secondary:  #141414;
-  --bg-card:       #1a1a2e;
-  --bg-card-hover: #222240;
-  --bg-overlay:    rgba(0, 0, 0, 0.92);
-  --bg-modal:      rgba(10, 10, 10, 0.97);
+  /* ── Premium Layered Blacks — cinematic depth ─ */
+  --bg-primary:    #050505;
+  --bg-secondary:  #0a0a0a;
+  --bg-tertiary:   #0d0d0d;
+  --bg-elevated:   #141414;
+  --bg-card:       #14141a;
+  --bg-card-hover: #1a1a24;
+  --bg-overlay:    rgba(5, 5, 5, 0.92);
+  --bg-modal:      rgba(8, 8, 8, 0.97);
+  --bg-atmosphere: radial-gradient(ellipse at 30% 20%, rgba(229,9,20,0.04) 0%, transparent 55%),
+                   radial-gradient(ellipse at 80% 80%, rgba(139,21,32,0.03) 0%, transparent 50%);
 
   /* ── Accent Colors ──────────────────────── */
   --accent-red:    #e50914;
@@ -26,10 +30,16 @@
   --text-muted:    #8c8c8c;
   --text-romantic:  #ff6b8a;
 
-  /* ── Typography ─────────────────────────── */
+  /* ── Typography — premium hierarchy ─ */
   --font-display:  'Outfit', sans-serif;
   --font-body:     'Inter', sans-serif;
   --font-romantic: 'Playfair Display', serif;
+  --tracking-hero: -0.03em;
+  --tracking-display: -0.02em;
+  --tracking-meta: 0.18em;
+  --leading-hero: 0.92;
+  --leading-body: 1.6;
+  --leading-romantic: 1.75;
 
   /* ── Sizing ─────────────────────────────── */
   --radius-sm:     4px;
@@ -38,11 +48,12 @@
   --radius-xl:     24px;
   --radius-full:   50%;
 
-  /* ── Shadows ────────────────────────────── */
-  --shadow-card:   0 4px 20px rgba(0, 0, 0, 0.5);
-  --shadow-card-hover: 0 8px 40px rgba(229, 9, 20, 0.2);
-  --shadow-cinematic: 0 0 80px rgba(229, 9, 20, 0.15);
-  --shadow-glow:   0 0 30px rgba(255, 107, 138, 0.3);
+  /* ── Shadows — premium depth ─ */
+  --shadow-card:   0 4px 24px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(229, 9, 20, 0.10);
+  --shadow-cinematic: 0 0 100px rgba(229, 9, 20, 0.08), 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-glow:   0 0 32px rgba(255, 107, 138, 0.18);
+  --shadow-premium: 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
 
   /* ── Transitions ────────────────────────── */
   --ease-smooth:   cubic-bezier(0.25, 0.46, 0.45, 0.94);

@@ -104,11 +104,17 @@ body.story-mode { background: #000; }
 .story-video-container.active { opacity: 1; transform: scale(1); pointer-events: all; }
 .story-video-container.fading { opacity: 0; transition: opacity 1s ease; }
 .story-video {
-  width: 100%;
-  height: 100%;
+  width: 92vw;
+  max-width: 760px;
+  height: 90vh;
+  max-height: 90vh;
   object-fit: contain;
-  max-width: 100vw;
-  max-height: 100vh;
+  border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.65), 0 0 32px rgba(229,9,20,0.10);
+  background: #000;
+}
+@media (max-width: 768px) {
+  .story-video { width: 92vw; max-width: 92vw; height: 80vh; max-height: 80vh; border-radius: 12px; }
 }
 .story-video-controls {
   position: absolute;
@@ -181,9 +187,17 @@ body.story-mode { background: #000; }
 .story-memory-overlay {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.72) 78%),
-    linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.10) 35%, rgba(0,0,0,0.85) 100%);
+    radial-gradient(ellipse at center, rgba(0,0,0,0.14) 0%, rgba(0,0,0,0.68) 76%),
+    linear-gradient(to bottom, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.08) 32%, rgba(0,0,0,0.88) 100%);
   z-index: 1;
+}
+.story-memory-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(5,5,5,0.28) 100%);
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Photo — cinematic, contained, not stretched */

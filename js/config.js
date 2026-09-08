@@ -68,7 +68,7 @@ const CONFIG = {
     {
       title: "OUR LITTLE MOVIE 🎬",
       items: [
-        { type: "video", src: "public/videos/vid-1.mp4", cover: "public/images/vid-cover-1.jpg", title: "That Road Trip", message: "Singing along to our favorite songs." }
+        { type: "video", src: "public/videos/our-story.mp4", cover: "public/images/vid-cover-1.jpg", title: "That Road Trip", message: "Singing along to our favorite songs." }
       ]
     }
   ],
@@ -81,7 +81,7 @@ const CONFIG = {
   },
 
   // ─── Story Video (Play Our Story experience) ────────────────
-  storyVideo: "public/videos/vid-1.mp4",
+  storyVideo: "public/videos/our-story.mp4",
   storyTimeline: [
     { type: "photo", source: "public/images/fav-1.jpg", start: 0, duration: 9, message: "Somehow, I found you.", animation: "slow-zoom" },
     { type: "photo", source: "public/images/fav-2.jpg", start: 9, duration: 8, message: "Then you became my favorite person.", animation: "slow-pan" },
@@ -104,16 +104,16 @@ const CONFIG = {
   },
 
   // ─── Cinematic Photo Memory Sequence ────────────────────────
-  // Each scene exactly 3s (3000) per request — image+chapter+title+description transition together
+  // Visual-first: one short sentence per memory — let photos do the storytelling
   memories: [
-    { chapter: "CHAPTER 01 — The Beginning", episode: "EPISODE 01 — HOW IT STARTED", image: "public/images/fav-1.jpg", title: "The Beginning", message: "I didn't know it then, but this was the beginning of my favorite story.", duration: 3000 },
-    { chapter: "CHAPTER 02 — You", episode: "EPISODE 02 — YOU", image: "public/images/fav-2.jpg", title: "You", message: "Somewhere along the way, you stopped being just someone I knew...", duration: 3000 },
-    { chapter: "CHAPTER 03 — Us", episode: "EPISODE 03 — US", image: "public/images/replay-2.jpg", title: "Us", message: "...and became the person I couldn't imagine my life without.", duration: 3000 },
-    { chapter: "CHAPTER 04 — My favorite smile", episode: "EPISODE 04 — MY FAVORITE PERSON", image: "public/images/fav-3.jpg", title: "My favorite smile", message: "Every picture here holds a piece of my heart.", duration: 3000 },
-    { chapter: "CHAPTER 05 — Laughing together", episode: "EPISODE 05 — EVERY LAUGH", image: "public/images/replay-4.jpg", title: "Laughing Together", message: "Your laugh is my favorite sound in the world.", duration: 3000 },
-    { chapter: "CHAPTER 06 — One of my best days", episode: "EPISODE 06 — BEST DAYS", image: "public/images/fav-5.jpg", title: "One of My Best Days", message: "You make the ordinary feel extraordinary.", duration: 3000 },
-    { chapter: "CHAPTER 07 — Adventures", episode: "EPISODE 07 — ADVENTURES", image: "public/images/replay-3.jpg", title: "Adventures", message: "Every adventure with you is my new favorite.", duration: 3000 },
-    { chapter: "FINAL CHAPTER — Forever", episode: "FINAL EPISODE — THE QUESTION", image: "public/images/fav-6.jpg", title: "Forever Favorite", message: "And this... this is just the beginning.", duration: 3000 }
+    { chapter: "CHAPTER 01 — The Beginning", episode: "EPISODE 01 — HOW IT STARTED", image: "public/images/fav-1.jpg", title: "The Beginning", message: "Some moments become memories before we even realize it.", duration: 3000 },
+    { chapter: "CHAPTER 02 — You", episode: "EPISODE 02 — YOU", image: "public/images/fav-2.jpg", title: "You", message: "You became my favorite hello.", duration: 3000 },
+    { chapter: "CHAPTER 03 — Us", episode: "EPISODE 03 — US", image: "public/images/replay-2.jpg", title: "Us", message: "Us — my favorite word.", duration: 3000 },
+    { chapter: "CHAPTER 04 — My favorite smile", episode: "EPISODE 04 — MY FAVORITE PERSON", image: "public/images/fav-3.jpg", title: "Your Smile", message: "Your smile, my favorite view.", duration: 3000 },
+    { chapter: "CHAPTER 05 — Laughing together", episode: "EPISODE 05 — EVERY LAUGH", image: "public/images/replay-4.jpg", title: "Laughing Together", message: "Your laugh is my favorite sound.", duration: 3000 },
+    { chapter: "CHAPTER 06 — One of my best days", episode: "EPISODE 06 — BEST DAYS", image: "public/images/fav-5.jpg", title: "One of My Best Days", message: "Ordinary days became special with you.", duration: 3000 },
+    { chapter: "CHAPTER 07 — Adventures", episode: "EPISODE 07 — ADVENTURES", image: "public/images/replay-3.jpg", title: "Adventures", message: "Every adventure led me to you.", duration: 3000 },
+    { chapter: "FINAL CHAPTER — Forever", episode: "FINAL EPISODE — THE QUESTION", image: "public/images/fav-6.jpg", title: "Forever", message: "And this is just the beginning.", duration: 3000 }
   ],
 
   // ─── Final CTA Button ──────────────────────────────────────
@@ -135,8 +135,8 @@ const CONFIG = {
     heart: "❤️",
     btnYes: "YES ❤️",
     btnYesCourse: "YES, OF COURSE ❤️",
-    // Favorite photo that slowly appears before the question
-    questionPhoto: "public/images/fav-6.jpg",
+    // Favorite photo that slowly appears before the question — mirror selfie behind YES buttons
+    questionPhoto: "public/images/proposal-bg.jpg",
     // YES evolution — cinematic emotional
     celebrationStages: {
       sheSaid: "SHE SAID YES. ❤️",
@@ -144,7 +144,7 @@ const CONFIG = {
       nextChapter: "And just like that…\nmy favorite story became our story.",
       finalTitle: "Jiya ❤️ Shlok"
     },
-    celebrationImage: "public/images/fav-6.jpg",
+    celebrationImage: "public/images/proposal-bg.jpg",
     // Personal letter — MAKE THIS YOUR OWN! Add inside jokes, dates, places only she knows
     letter: {
       buttonText: "One last thing... 💌",

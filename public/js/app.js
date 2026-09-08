@@ -78,4 +78,22 @@ function initScrollAnimations() {
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
   document.querySelectorAll('.scroll-animate').forEach(el => observer.observe(el));
+
+  // Premium reveal for main sections — subtle, staggered
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.media-row, #why-choose-section, #feature-section, .final-cta-container, #dashboard-footer').forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+  const revealObs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        revealObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.media-row, #why-choose-section, #feature-section, .final-cta-container, #dashboard-footer').forEach((el, i) => {
+    el.style.transitionDelay = (i % 3) * 80 + 'ms';
+    revealObs.observe(el);
+  });
 }
